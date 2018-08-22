@@ -5,9 +5,9 @@ import * as cheerio from 'cheerio';
 import {downloadToDb} from './downloadToDb';
 import {Client} from 'pg';
 
-require('dotenv').config();
+import {config as loadConfig} from 'dotenv';
 
-let headers: any;
+loadConfig();
 
 export const fetchChannels = async (client: Client) => {
     const params = createQueryString();
@@ -16,26 +16,25 @@ export const fetchChannels = async (client: Client) => {
     console.log(`Will fetch channels from ${url}`);
 
     const respBuff = await fetch(url)
-        .then((resp) => {
-            headers = resp.headers;
-            return resp.buffer();
-        });
+        .then((resp) => resp.buffer());
 
-    const str = iconv.decode(respBuff, 'win1251');
+    const programmeContentString = iconv.decode(respBuff, 'win1251');
 
-    const $ = cheerio.load(str);
+    const $ = cheerio.load(programmeContentString);
 
     const rows = $('table tbody tr');
 
     const rowsArray = rows.toArray();
 
 
-    for (const row of rowsArray) {
+    const promises: Array<Promise<any>> = rowsArray.map((row) => {
 
         const releaseDate = $(row).find('td').eq(3).text();
         const href = $(row).find('a').attr('href');
 
-        await downloadToDb(client, `${process.env.STV_BASEURL}${href}`, headers, releaseDate);
+        return downloadToDb(client, `${process.env.STV_BASEURL}${href}`, releaseDate);
 
-    }
+    });
+
+    await Promise.all(promises);
 };

@@ -1,14 +1,8 @@
 import {IFetchResult} from './interfaces/IFetchResult';
 import fetch from 'node-fetch';
 
-export const fetchFile = async (url: string, /*cookie: string*/): Promise<IFetchResult> => {
-    return fetch(url, {
-/*
-        headers: {
-            cookie
-        }
-*/
-    })
+export const fetchFile = async (url: string): Promise<IFetchResult> => {
+    return fetch(url)
         .then((resp) => {
             const contentDispositionString = resp.headers.get('content-disposition');
 

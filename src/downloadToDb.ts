@@ -4,10 +4,9 @@ import {Client} from 'pg';
 import {channelsNames} from './channelsNames';
 import {fetchFile} from './fetchFile';
 
-export const downloadToDb = async (client: Client, url: string, headers: Headers, releaseDate: string) => {
+export const downloadToDb = async (client: Client, url: string, releaseDate: string) => {
 
     const {fileName, content} = await fetchFile(url);
-
 
     const buff = await content;
 
